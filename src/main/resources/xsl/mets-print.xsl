@@ -52,6 +52,7 @@
                 xmlns:utils="xalan://de.vzg.metsprinter.Utils"
                 exclude-result-prefixes="utils i18n ranges">
 
+  <xsl:param name="ServletsBaseURL" />
   <xsl:param name="derivateID" />
   <xsl:param name="objectID" />
   <xsl:param name="ranges"
@@ -155,7 +156,8 @@
     <xsl:for-each select="$pagesInRange">
 
       <xsl:variable name="physID" select="@ID" />
-      <xsl:variable name="order" select="count(/mets:mets/mets:structMap[@TYPE='PHYSICAL']//mets:div[@ID=$physID]/preceding-sibling::mets:div)+1" />
+      <xsl:variable name="order"
+                    select="count(/mets:mets/mets:structMap[@TYPE='PHYSICAL']//mets:div[@ID=$physID]/preceding-sibling::mets:div)+1" />
 
       <fo:page-sequence master-reference="singlePage">
         <!-- print footer -->
@@ -239,7 +241,23 @@
       <xsl:attribute name="id">
         <xsl:value-of select="$physID" />
       </xsl:attribute>
-      <fo:external-graphic src="url('{utils:getIFSPath($derivateID, mets:FLocat/@xlink:href)}')"
+
+      <xsl:variable name="graphicURL">
+        <xsl:variable name="useDirectEmbed" select="'true'" />
+        <xsl:variable name="directSupportedEnding" select="'.jpg'" />
+        <xsl:choose>
+          <xsl:when
+            test="$useDirectEmbed = 'true' and $directSupportedEnding = substring(mets:FLocat/@xlink:href, string-length(mets:FLocat/@xlink:href) - string-length($directSupportedEnding) + 1)">
+            <xsl:value-of select="utils:getIFSPath($derivateID, mets:FLocat/@xlink:href)" />
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="concat($ServletsBaseURL,'MCRTileCombineServlet/MAX/',$derivateID,'/',mets:FLocat/@xlink:href)" />
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+
+
+      <fo:external-graphic src="url('{$graphicURL}')"
                            content-width="scale-to-fit"
                            content-height="scale-to-fit"
                            scaling="uniform" height="{$picturePageHeight}" width="{$picturePageWidth}" />

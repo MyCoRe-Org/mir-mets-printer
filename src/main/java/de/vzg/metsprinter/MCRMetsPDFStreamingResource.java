@@ -75,7 +75,7 @@ import org.mycore.datamodel.metadata.MCRObjectID;
 import org.mycore.datamodel.niofs.MCRPath;
 import org.mycore.mets.model.MCRMETSGenerator;
 
-@Path("/pdf/{derivate}")
+@Path("/pdf")
 public class MCRMetsPDFStreamingResource {
 
     private static final String PDF_FUNCTION_PREFIX = "MIR.PDF";
@@ -104,8 +104,18 @@ public class MCRMetsPDFStreamingResource {
     }
 
     @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path("/")
+    public Response getRestrictions() {
+        return Response.status(Response.Status.OK)
+            .entity("{\"maxPages\": \"" + MCRConfiguration.instance().getString("MIR.PDF.MAXPages") + "\"}").build();
+    }
+
+    @GET
+    @Path("/{derivate}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response streamPDF(@PathParam("derivate") String derivate, @QueryParam("pages") String pages, @DefaultValue("false") @QueryParam("test") boolean test) {
+    public Response streamPDF(@PathParam("derivate") String derivate, @QueryParam("pages") String pages,
+        @DefaultValue("false") @QueryParam("test") boolean test) {
         if (!MCRConfiguration.instance().getBoolean(PDF_FUNCTION_PREFIX + ".Enabled", false)) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -150,7 +160,7 @@ public class MCRMetsPDFStreamingResource {
                 }
 
             });
-        if(!test){
+        if (!test) {
             rb = rb.header("Content-Disposition", "attachment; filename=\"" + derivate + ".pdf\"");
         }
 
