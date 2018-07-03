@@ -19,7 +19,7 @@
  *
  */
 
-package de.vzg.metsprinter;
+package org.mycore.mir.metsprinter;
 
 import java.util.TreeSet;
 

@@ -18,7 +18,7 @@
  *  59 Temple Place - Suite 330, Boston, MA  02111-1307 USA
  *
  */
-package de.vzg.metsprinter;
+package org.mycore.mir.metsprinter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
