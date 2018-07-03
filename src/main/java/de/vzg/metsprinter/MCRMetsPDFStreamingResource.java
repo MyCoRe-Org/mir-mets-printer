@@ -54,6 +54,7 @@ import org.mycore.datamodel.metadata.MCRMetadataManager;
 import org.mycore.datamodel.metadata.MCRObjectID;
 import org.mycore.datamodel.niofs.MCRPath;
 import org.mycore.mets.model.MCRMETSGenerator;
+import org.mycore.mets.model.MCRMETSGeneratorFactory;
 
 @Path("/pdf")
 public class MCRMetsPDFStreamingResource {
@@ -72,13 +73,7 @@ public class MCRMetsPDFStreamingResource {
             if (metsExists) {
                 ignoreNodes.add(path);
             }
-            Document mets = null;
-            try {
-                mets = MCRMETSGenerator.getGenerator().getMETS(MCRPath.getPath(derivate, "/"), ignoreNodes)
-                    .asDocument();
-            } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                throw new MCRException("Error while generating mets.xml", e);
-            }
+            Document mets = MCRMETSGeneratorFactory.create(MCRPath.getPath(derivate, "/")).generate().asDocument();
             return new MCRJDOMContent(mets);
         }
     }
