@@ -27,8 +27,8 @@
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xalan="http://xml.apache.org/xalan"
                 xmlns:i18n="xalan://org.mycore.services.i18n.MCRTranslation"
-                xmlns:ranges="xalan://de.vzg.metsprinter.Ranges"
-                xmlns:utils="xalan://de.vzg.metsprinter.Utils"
+                xmlns:ranges="xalan://org.mycore.mir.metsprinter.Ranges"
+                xmlns:utils="xalan://org.mycore.mir.metsprinter.Utils"
                 exclude-result-prefixes="utils i18n ranges">
 
   <xsl:param name="ServletsBaseURL" />
