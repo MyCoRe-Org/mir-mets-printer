@@ -42,6 +42,7 @@ import org.mycore.common.MCRException;
 import org.mycore.common.MCRSession;
 import org.mycore.common.MCRSessionMgr;
 import org.mycore.common.config.MCRConfiguration;
+import org.mycore.common.content.MCRByteContent;
 import org.mycore.common.content.MCRContent;
 import org.mycore.common.content.MCRJDOMContent;
 import org.mycore.common.content.MCRPathContent;
@@ -132,8 +133,7 @@ public class MCRMetsPDFStreamingResource {
         Response.ResponseBuilder rb = Response.ok().entity(
             (StreamingOutput) outputStream -> {
                 if (!test) {
-                    new MCRFopper()
-                        .transform(new MCRStreamContent(new ByteArrayInputStream(sout.toByteArray())), outputStream);
+                    new MCRFopper().transform(new MCRByteContent(sout.toByteArray()), outputStream);
                 } else {
                     outputStream.write(sout.toByteArray());
                 }
