@@ -84,7 +84,7 @@ public class MCRMetsPDFStreamingResource {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/")
     public Response getRestrictions() {
         return Response.status(Response.Status.OK)
