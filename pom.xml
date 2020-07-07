@@ -26,14 +26,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mycore</groupId>
   <artifactId>mir-mets-printer</artifactId>
-  <version>2018.06.0.1-SNAPSHOT</version>
+  <version>2020.06.0-SNAPSHOT</version>
   <parent>
     <groupId>org.mycore</groupId>
     <artifactId>mycore-parent</artifactId>
-    <version>37</version>
+    <version>45-SNAPSHOT</version>
   </parent>
   <properties>
-    <mycore.version>2018.06.0.1-SNAPSHOT</mycore.version>
+    <mycore.version>2020.06.0-SNAPSHOT</mycore.version>
   </properties>
   <scm>
     <connection>scm:git:https://github.com/paschty/mir-mets-printer.git</connection>
@@ -106,6 +106,12 @@
     <dependency>
       <groupId>org.mycore</groupId>
       <artifactId>mycore-mets</artifactId>
+      <version>${mycore.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mycore</groupId>
+      <artifactId>mycore-fo</artifactId>
       <version>${mycore.version}</version>
       <scope>provided</scope>
     </dependency>

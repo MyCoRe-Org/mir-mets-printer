@@ -47,7 +47,7 @@ import org.mycore.common.content.MCRContent;
 import org.mycore.common.content.MCRJDOMContent;
 import org.mycore.common.content.MCRPathContent;
 import org.mycore.common.content.MCRStreamContent;
-import org.mycore.common.content.transformer.MCRFopper;
+import org.mycore.component.fo.common.content.transformer.MCRFopper;
 import org.mycore.common.content.transformer.MCRXSLTransformer;
 import org.mycore.common.xsl.MCRParameterCollector;
 import org.mycore.datamodel.metadata.MCRMetadataManager;
