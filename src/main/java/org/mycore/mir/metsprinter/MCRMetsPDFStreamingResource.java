@@ -41,7 +41,7 @@ import org.mycore.access.MCRAccessManager;
 import org.mycore.common.MCRException;
 import org.mycore.common.MCRSession;
 import org.mycore.common.MCRSessionMgr;
-import org.mycore.common.config.MCRConfiguration;
+import org.mycore.common.config.MCRConfiguration2;
 import org.mycore.common.content.MCRByteContent;
 import org.mycore.common.content.MCRContent;
 import org.mycore.common.content.MCRJDOMContent;
@@ -60,6 +60,10 @@ import org.mycore.mets.model.MCRMETSGeneratorFactory;
 public class MCRMetsPDFStreamingResource {
 
     private static final String PDF_FUNCTION_PREFIX = "MIR.PDF";
+
+    public static final String MIR_PDF_XSLSTYLESHEET = PDF_FUNCTION_PREFIX + ".XSLStylesheet";
+
+    public static final String MIR_PDF_MAXPAGES = PDF_FUNCTION_PREFIX + ".MAXPages";
 
     private static MCRContent getMetsContent(String derivate) {
         MCRPath path = MCRPath.getPath(derivate, "mets.xml");
@@ -83,7 +87,9 @@ public class MCRMetsPDFStreamingResource {
     @Path("/")
     public Response getRestrictions() {
         return Response.status(Response.Status.OK)
-            .entity("{\"maxPages\": \"" + MCRConfiguration.instance().getString("MIR.PDF.MAXPages") + "\"}").build();
+            .entity("{\"maxPages\": \"" + MCRConfiguration2.getInt(MIR_PDF_MAXPAGES)
+                .orElseThrow(() -> MCRConfiguration2.createConfigurationException(MIR_PDF_MAXPAGES)) + "\"}")
+            .build();
     }
 
     @GET
@@ -91,7 +97,7 @@ public class MCRMetsPDFStreamingResource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response streamPDF(@PathParam("derivate") String derivate, @QueryParam("pages") String pages,
         @DefaultValue("false") @QueryParam("test") boolean test) {
-        if (!MCRConfiguration.instance().getBoolean(PDF_FUNCTION_PREFIX + ".Enabled", false)) {
+        if (!MCRConfiguration2.getBoolean(PDF_FUNCTION_PREFIX + ".Enabled").orElse(false)) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
@@ -106,7 +112,8 @@ public class MCRMetsPDFStreamingResource {
 
         MCRContent metsContent = getMetsContent(derivate);
 
-        String stylesheet = MCRConfiguration.instance().getString(PDF_FUNCTION_PREFIX + ".XSLStylesheet");
+        String stylesheet = MCRConfiguration2.getString(MIR_PDF_XSLSTYLESHEET)
+            .orElseThrow(() -> MCRConfiguration2.createConfigurationException(MIR_PDF_XSLSTYLESHEET));
 
         MCRSession session = MCRSessionMgr.getCurrentSession();
         session.put("derivateID", derivate);
