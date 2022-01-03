@@ -33,7 +33,7 @@
     <version>47</version>
   </parent>
   <properties>
-    <mycore.version>2021.06.0-SNAPSHOT</mycore.version>
+    <mycore.version>2021.06.1-SNAPSHOT</mycore.version>
   </properties>
   <scm>
     <connection>scm:git:https://github.com/paschty/mir-mets-printer.git</connection>
