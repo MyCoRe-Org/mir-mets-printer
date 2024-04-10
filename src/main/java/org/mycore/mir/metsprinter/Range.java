@@ -21,10 +21,11 @@
 
 package org.mycore.mir.metsprinter;
 
-import java.text.MessageFormat;
+import java.util.Locale;
 
 public class Range implements Comparable<Range> {
-    private int from, to;
+    private final int from;
+    private final int to;
 
     public Range(String expr) {
         if (expr.contains("-")) {
@@ -53,7 +54,7 @@ public class Range implements Comparable<Range> {
         if (from == to) {
             return String.valueOf(from);
         }
-        return MessageFormat.format("{0}-{1}", String.valueOf(from), String.valueOf(to));
+        return String.format(Locale.ROOT, "%d-%d", from, to);
     }
 
     @Override

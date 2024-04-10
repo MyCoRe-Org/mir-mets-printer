@@ -54,7 +54,7 @@
 
   <xsl:template match="/mets:mets">
 
-    <fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format" id="root" font-family="Frutiger" color="#58585a">
+    <fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format" id="root" font-family="Arial" color="#58585a">
       <xsl:comment>
         <xsl:value-of select="$ranges" />
       </xsl:comment>

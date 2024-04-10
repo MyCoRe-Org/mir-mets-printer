@@ -20,21 +20,10 @@
  */
 package org.mycore.mir.metsprinter;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashSet;
-
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
 import org.jdom2.Document;
 import org.mycore.access.MCRAccessManager;
@@ -46,15 +35,23 @@ import org.mycore.common.content.MCRByteContent;
 import org.mycore.common.content.MCRContent;
 import org.mycore.common.content.MCRJDOMContent;
 import org.mycore.common.content.MCRPathContent;
-import org.mycore.common.content.MCRStreamContent;
-import org.mycore.component.fo.common.content.transformer.MCRFopper;
 import org.mycore.common.content.transformer.MCRXSLTransformer;
 import org.mycore.common.xsl.MCRParameterCollector;
+import org.mycore.component.fo.common.content.transformer.MCRFopper;
 import org.mycore.datamodel.metadata.MCRMetadataManager;
 import org.mycore.datamodel.metadata.MCRObjectID;
 import org.mycore.datamodel.niofs.MCRPath;
-import org.mycore.mets.model.MCRMETSGenerator;
 import org.mycore.mets.model.MCRMETSGeneratorFactory;
+
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 @Path("/pdf")
 public class MCRMetsPDFStreamingResource {

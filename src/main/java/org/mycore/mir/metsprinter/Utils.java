@@ -27,7 +27,7 @@ import org.mycore.datamodel.niofs.MCRPath;
 
 public class Utils {
 
-    public static String getIFSPath(String derivate,String file) throws IOException {
-        return MCRPath.getPath(derivate,file).toPhysicalPath().toAbsolutePath().toUri().toString();
+    public static String getIFSPath(String derivate, String file) throws IOException {
+        return MCRPath.getPath(derivate, file).toPhysicalPath().toAbsolutePath().toUri().toString();
     }
 }
