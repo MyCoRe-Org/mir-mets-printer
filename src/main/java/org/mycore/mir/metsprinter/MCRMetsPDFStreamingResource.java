@@ -31,6 +31,9 @@ import java.util.List;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.commons.io.output.CountingOutputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom2.Document;
 import org.mycore.access.MCRAccessManager;
 import org.mycore.common.MCRException;
@@ -50,8 +53,6 @@ import org.mycore.datamodel.metadata.MCRMetadataManager;
 import org.mycore.datamodel.metadata.MCRObjectID;
 import org.mycore.datamodel.niofs.MCRPath;
 import org.mycore.mets.model.MCRMETSGeneratorFactory;
-
-import com.google.common.io.CountingOutputStream;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.DefaultValue;
@@ -75,8 +76,11 @@ import jakarta.ws.rs.core.StreamingOutput;
 
     public static final String METS_TEMP_FILE_SESSION_KEY = "mets2pdfTempFiles";
 
+    private static final Logger LOGGER = LogManager.getLogger();
+
     @PostConstruct
     public void registerSessionListener(){
+        LOGGER.info("Registering session listener for deleting temporary pdf files");
         MCRSessionMgr.addSessionListener(this);
     }
 
@@ -159,7 +163,7 @@ import jakarta.ws.rs.core.StreamingOutput;
                 } else {
                     cos.write(byteArray);
                 }
-                fileSize = cos.getCount();
+                fileSize = cos.getByteCount();
             }
         } catch (IOException | TransformerException e) {
             throw new MCRException(e);
