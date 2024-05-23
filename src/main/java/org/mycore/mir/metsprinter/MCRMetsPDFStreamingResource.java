@@ -22,8 +22,14 @@ package org.mycore.mir.metsprinter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+
+import javax.xml.transform.TransformerException;
 
 import org.jdom2.Document;
 import org.mycore.access.MCRAccessManager;
@@ -36,13 +42,18 @@ import org.mycore.common.content.MCRContent;
 import org.mycore.common.content.MCRJDOMContent;
 import org.mycore.common.content.MCRPathContent;
 import org.mycore.common.content.transformer.MCRXSLTransformer;
+import org.mycore.common.events.MCRSessionEvent;
+import org.mycore.common.events.MCRSessionListener;
 import org.mycore.common.xsl.MCRParameterCollector;
-import org.mycore.component.fo.common.content.transformer.MCRFopper;
+import org.mycore.component.fo.common.fo.MCRFoFormatterHelper;
 import org.mycore.datamodel.metadata.MCRMetadataManager;
 import org.mycore.datamodel.metadata.MCRObjectID;
 import org.mycore.datamodel.niofs.MCRPath;
 import org.mycore.mets.model.MCRMETSGeneratorFactory;
 
+import com.google.common.io.CountingOutputStream;
+
+import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -54,13 +65,20 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 
 @Path("/pdf")
-public class MCRMetsPDFStreamingResource {
+    public class MCRMetsPDFStreamingResource implements MCRSessionListener {
 
     private static final String PDF_FUNCTION_PREFIX = "MIR.PDF";
 
     public static final String MIR_PDF_XSLSTYLESHEET = PDF_FUNCTION_PREFIX + ".XSLStylesheet";
 
     public static final String MIR_PDF_MAXPAGES = PDF_FUNCTION_PREFIX + ".MAXPages";
+
+    public static final String METS_TEMP_FILE_SESSION_KEY = "mets2pdfTempFiles";
+
+    @PostConstruct
+    public void registerSessionListener(){
+        MCRSessionMgr.addSessionListener(this);
+    }
 
     private static MCRContent getMetsContent(String derivate) {
         MCRPath path = MCRPath.getPath(derivate, "mets.xml");
@@ -120,29 +138,91 @@ public class MCRMetsPDFStreamingResource {
 
         MCRXSLTransformer xslTransformer = new MCRXSLTransformer(stylesheet);
 
-        ByteArrayOutputStream out;
-        try {
-            out = new ByteArrayOutputStream();
+        byte[] byteArray;
+        try(ByteArrayOutputStream out = new ByteArrayOutputStream() ) {
             xslTransformer.transform(metsContent, out, new MCRParameterCollector(false));
+            byteArray = out.toByteArray();
         } catch (IOException e) {
             throw new MCRException(e);
         }
 
-        final ByteArrayOutputStream sout = out;
+        java.nio.file.Path tempFile;
+        long fileSize = -1;
+
+        try {
+            tempFile = Files.createTempFile("mets2pdf_" + derivate, ".pdf");
+            storeTempFileInfoInSession(tempFile);
+            try(OutputStream os = Files.newOutputStream(tempFile);
+                CountingOutputStream cos = new CountingOutputStream(os)){
+                if (!test) {
+                    MCRFoFormatterHelper.getFoFormatter().transform(new MCRByteContent(byteArray), cos);
+                } else {
+                    cos.write(byteArray);
+                }
+                fileSize = cos.getCount();
+            }
+        } catch (IOException | TransformerException e) {
+            throw new MCRException(e);
+        }
+
         Response.ResponseBuilder rb = Response.ok().entity(
             (StreamingOutput) outputStream -> {
-                if (!test) {
-                    new MCRFopper().transform(new MCRByteContent(sout.toByteArray()), outputStream);
-                } else {
-                    outputStream.write(sout.toByteArray());
+                try {
+                    Files.copy(tempFile, outputStream);
+                } catch (IOException e) {
+                    throw new MCRException(e);
                 }
-
+                deleteFile(tempFile);
             });
         if (!test) {
             rb = rb.header("Content-Disposition", "attachment; filename=\"" + derivate + ".pdf\"");
         }
+        if(fileSize > 0){
+            rb.header("Content-Length", fileSize);
+        }
 
         return rb.build();
     }
+
+    private static void storeTempFileInfoInSession(java.nio.file.Path tempFile) {
+        MCRSession session = MCRSessionMgr.getCurrentSession();
+        Object tempFileList = session.get(METS_TEMP_FILE_SESSION_KEY);
+        if(tempFileList instanceof List list){
+            list.add(tempFile);
+        } else {
+            List<java.nio.file.Path> list = new ArrayList<>();
+            list.add(tempFile);
+            session.put(METS_TEMP_FILE_SESSION_KEY, list);
+        }
+    }
+
+    private static void deleteTempFilesInSession() {
+        MCRSession session = MCRSessionMgr.getCurrentSession();
+        Object tempFileList = session.get(METS_TEMP_FILE_SESSION_KEY);
+        if(tempFileList instanceof List list){
+            for(Object tempFile : list){
+                if(tempFile instanceof java.nio.file.Path tempFilePath) {
+                    deleteFile(tempFilePath);
+                }
+            }
+        }
+    }
+
+    private static void deleteFile(java.nio.file.Path tempFile) {
+        try (OutputStream os = Files.newOutputStream(tempFile, StandardOpenOption.DELETE_ON_CLOSE)){
+            // Workaround to delete the file after the response is sent
+            os.close();
+        } catch (IOException e) {
+            throw new MCRException("Error while closing stream", e);
+        }
+    }
+
+    @Override
+    public void sessionEvent(MCRSessionEvent event) {
+        if(event.getType().equals(MCRSessionEvent.Type.destroyed)){
+            deleteTempFilesInSession();
+        }
+    }
+
 
 }
