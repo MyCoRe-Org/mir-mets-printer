@@ -150,12 +150,12 @@ import jakarta.ws.rs.core.StreamingOutput;
             throw new MCRException(e);
         }
 
-        java.nio.file.Path tempFile;
+        java.nio.file.Path tempFile = null;
         long fileSize = -1;
 
         try {
             tempFile = Files.createTempFile("mets2pdf_" + derivate, ".pdf");
-            storeTempFileInfoInSession(tempFile);
+            storeTempFileInfoInSession(MCRSessionMgr.getCurrentSession(), tempFile);
             try(OutputStream os = Files.newOutputStream(tempFile);
                 CountingOutputStream cos = new CountingOutputStream(os)){
                 if (!test) {
@@ -166,17 +166,22 @@ import jakarta.ws.rs.core.StreamingOutput;
                 fileSize = cos.getByteCount();
             }
         } catch (IOException | TransformerException e) {
+            if (tempFile != null) {
+                deleteFile(tempFile);
+            }
             throw new MCRException(e);
         }
 
+        java.nio.file.Path finalTempFile = tempFile;
         Response.ResponseBuilder rb = Response.ok().entity(
             (StreamingOutput) outputStream -> {
                 try {
-                    Files.copy(tempFile, outputStream);
+                    Files.copy(finalTempFile, outputStream);
                 } catch (IOException e) {
                     throw new MCRException(e);
+                } finally {
+                    deleteFile(finalTempFile);
                 }
-                deleteFile(tempFile);
             });
         if (!test) {
             rb = rb.header("Content-Disposition", "attachment; filename=\"" + derivate + ".pdf\"");
@@ -188,8 +193,7 @@ import jakarta.ws.rs.core.StreamingOutput;
         return rb.build();
     }
 
-    private static void storeTempFileInfoInSession(java.nio.file.Path tempFile) {
-        MCRSession session = MCRSessionMgr.getCurrentSession();
+    private static void storeTempFileInfoInSession(MCRSession session, java.nio.file.Path tempFile) {
         Object tempFileList = session.get(METS_TEMP_FILE_SESSION_KEY);
         if(tempFileList instanceof List list){
             list.add(tempFile);
@@ -200,8 +204,7 @@ import jakarta.ws.rs.core.StreamingOutput;
         }
     }
 
-    private static void deleteTempFilesInSession() {
-        MCRSession session = MCRSessionMgr.getCurrentSession();
+    private static void deleteTempFilesInSession(MCRSession session) {
         Object tempFileList = session.get(METS_TEMP_FILE_SESSION_KEY);
         if(tempFileList instanceof List list){
             for(Object tempFile : list){
@@ -209,6 +212,7 @@ import jakarta.ws.rs.core.StreamingOutput;
                     deleteFile(tempFilePath);
                 }
             }
+            session.deleteObject(METS_TEMP_FILE_SESSION_KEY);
         }
     }
 
@@ -224,7 +228,7 @@ import jakarta.ws.rs.core.StreamingOutput;
     @Override
     public void sessionEvent(MCRSessionEvent event) {
         if(event.getType().equals(MCRSessionEvent.Type.destroyed)){
-            deleteTempFilesInSession();
+            deleteTempFilesInSession(event.getSession());
         }
     }
 
