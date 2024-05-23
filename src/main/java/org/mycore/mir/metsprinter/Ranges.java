@@ -27,7 +27,7 @@ public class Ranges {
     TreeSet<Range> ranges;
 
     public Ranges(String expr) {
-        String[] split = expr.split(",");
+        String[] split = expr.split(" *, *");
         ranges = new TreeSet<Range>();
         for (String exp : split) {
             ranges.add(new Range(exp));
