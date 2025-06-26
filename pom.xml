@@ -34,7 +34,8 @@
     <developerConnection>scm:git:https://github.com/MyCoRe-Org/mir-mets-printer.git</developerConnection>
   </scm>
   <properties>
-    <mycore.version>2023.06.2-SNAPSHOT</mycore.version>
+    <java.target.version>17</java.target.version>
+    <mycore.version>2023.06.3-SNAPSHOT</mycore.version>
   </properties>
   <build>
     <plugins>
@@ -65,8 +66,9 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <id>central-portal-snapshots</id>
+      <name>Central Portal Snapshots</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
     </repository>
   </repositories>
 
@@ -119,6 +121,29 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>deploy-to-sonatype</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.7.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <centralSnapshotsUrl>https://central.sonatype.com/repository/maven-snapshots</centralSnapshotsUrl>
+              <publishingServerId>sonatype-central</publishingServerId>
+              <autoPublish>true</autoPublish>
+              <waitUntil>published</waitUntil>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
