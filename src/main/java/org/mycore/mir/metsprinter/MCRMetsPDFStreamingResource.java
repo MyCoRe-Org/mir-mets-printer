@@ -44,6 +44,7 @@ import org.mycore.common.content.MCRByteContent;
 import org.mycore.common.content.MCRContent;
 import org.mycore.common.content.MCRJDOMContent;
 import org.mycore.common.content.MCRPathContent;
+import org.mycore.common.content.transformer.MCRContentTransformerFactory;
 import org.mycore.common.content.transformer.MCRXSLTransformer;
 import org.mycore.common.events.MCRSessionEvent;
 import org.mycore.common.events.MCRSessionListener;
@@ -69,8 +70,6 @@ import jakarta.ws.rs.core.StreamingOutput;
     public class MCRMetsPDFStreamingResource implements MCRSessionListener {
 
     private static final String PDF_FUNCTION_PREFIX = "MIR.PDF";
-
-    public static final String MIR_PDF_XSLSTYLESHEET = PDF_FUNCTION_PREFIX + ".XSLStylesheet";
 
     public static final String MIR_PDF_MAXPAGES = PDF_FUNCTION_PREFIX + ".MAXPages";
 
@@ -131,16 +130,13 @@ import jakarta.ws.rs.core.StreamingOutput;
 
         MCRContent metsContent = getMetsContent(derivate);
 
-        String stylesheet = MCRConfiguration2.getString(MIR_PDF_XSLSTYLESHEET)
-            .orElseThrow(() -> MCRConfiguration2.createConfigurationException(MIR_PDF_XSLSTYLESHEET));
-
         MCRSession session = MCRSessionMgr.getCurrentSession();
         session.put("derivateID", derivate);
         if (pages != null) {
             session.put("ranges", pages);
         }
 
-        MCRXSLTransformer xslTransformer = new MCRXSLTransformer(stylesheet);
+		MCRXSLTransformer xslTransformer = (MCRXSLTransformer) MCRContentTransformerFactory.getTransformer("mets-print");
 
         byte[] byteArray;
         try(ByteArrayOutputStream out = new ByteArrayOutputStream() ) {
