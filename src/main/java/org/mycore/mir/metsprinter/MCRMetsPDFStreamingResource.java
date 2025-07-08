@@ -44,8 +44,9 @@ import org.mycore.common.content.MCRByteContent;
 import org.mycore.common.content.MCRContent;
 import org.mycore.common.content.MCRJDOMContent;
 import org.mycore.common.content.MCRPathContent;
+import org.mycore.common.content.transformer.MCRContentTransformer;
 import org.mycore.common.content.transformer.MCRContentTransformerFactory;
-import org.mycore.common.content.transformer.MCRXSLTransformer;
+import org.mycore.common.content.transformer.MCRParameterizedTransformer;
 import org.mycore.common.events.MCRSessionEvent;
 import org.mycore.common.events.MCRSessionListener;
 import org.mycore.common.xsl.MCRParameterCollector;
@@ -136,11 +137,16 @@ import jakarta.ws.rs.core.StreamingOutput;
             session.put("ranges", pages);
         }
 
-		MCRXSLTransformer xslTransformer = (MCRXSLTransformer) MCRContentTransformerFactory.getTransformer("mets-print");
+        MCRContentTransformer xslTransformer = MCRContentTransformerFactory.getTransformer("mets-print");
 
         byte[] byteArray;
         try(ByteArrayOutputStream out = new ByteArrayOutputStream() ) {
-            xslTransformer.transform(metsContent, out, new MCRParameterCollector(false));
+
+            if (xslTransformer instanceof MCRParameterizedTransformer paramTransformer) {
+                paramTransformer.transform(metsContent, out, new MCRParameterCollector(false));
+            } else {
+                xslTransformer.transform(metsContent, out);
+            }
             byteArray = out.toByteArray();
         } catch (IOException e) {
             throw new MCRException(e);
