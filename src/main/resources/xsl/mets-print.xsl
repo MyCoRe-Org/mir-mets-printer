@@ -222,19 +222,8 @@
       </xsl:attribute>
 
       <xsl:variable name="graphicURL">
-        <xsl:variable name="useDirectEmbed" select="'true'" />
-        <xsl:variable name="directSupportedEnding" select="'.jpg'" />
-        <xsl:choose>
-          <xsl:when
-            test="$useDirectEmbed = 'true' and $directSupportedEnding = substring(mets:FLocat/@xlink:href, string-length(mets:FLocat/@xlink:href) - string-length($directSupportedEnding) + 1)">
-            <xsl:value-of select="utils:getIFSPath($derivateID, mets:FLocat/@xlink:href)" />
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:value-of select="concat($ServletsBaseURL,'MCRTileCombineServlet/MAX/',$derivateID,'/',mets:FLocat/@xlink:href)" />
-          </xsl:otherwise>
-        </xsl:choose>
+            <xsl:value-of select="concat('combinedTiles:',$derivateID,'/',mets:FLocat/@xlink:href)" />
       </xsl:variable>
-
 
       <fo:external-graphic src="url('{$graphicURL}')"
                            content-width="scale-to-fit"

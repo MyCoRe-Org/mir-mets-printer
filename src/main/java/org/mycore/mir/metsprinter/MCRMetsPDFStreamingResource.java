@@ -26,7 +26,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.xml.transform.TransformerException;
@@ -48,6 +47,7 @@ import org.mycore.common.content.transformer.MCRContentTransformer;
 import org.mycore.common.content.transformer.MCRContentTransformerFactory;
 import org.mycore.common.content.transformer.MCRParameterizedTransformer;
 import org.mycore.common.events.MCRSessionEvent;
+import org.mycore.common.events.MCRSessionEvent.Type;
 import org.mycore.common.events.MCRSessionListener;
 import org.mycore.common.xsl.MCRParameterCollector;
 import org.mycore.component.fo.common.fo.MCRFoFormatterHelper;
@@ -92,10 +92,6 @@ import jakarta.ws.rs.core.StreamingOutput;
             content.setDocType("mets");
             return content;
         } else {
-            HashSet<MCRPath> ignoreNodes = new HashSet<MCRPath>();
-            if (metsExists) {
-                ignoreNodes.add(path);
-            }
             Document mets = MCRMETSGeneratorFactory.create(MCRPath.getPath(derivate, "/")).generate().asDocument();
             return new MCRJDOMContent(mets);
         }
@@ -229,7 +225,7 @@ import jakarta.ws.rs.core.StreamingOutput;
 
     @Override
     public void sessionEvent(MCRSessionEvent event) {
-        if(event.getType().equals(MCRSessionEvent.Type.destroyed)){
+        if(event.getType().equals(Type.DESTROYED)) {
             deleteTempFilesInSession(event.getSession());
         }
     }
