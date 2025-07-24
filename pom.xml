@@ -98,6 +98,10 @@
       <artifactId>mycore-iview2</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.mycore.iview2</groupId>
+      <artifactId>image-tiler</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jdom</groupId>
       <artifactId>jdom2</artifactId>
       <scope>provided</scope>
