@@ -35,7 +35,7 @@
   </scm>
   <properties>
     <java.target.version>17</java.target.version>
-    <mycore.version>2023.06.4-SNAPSHOT</mycore.version>
+    <mycore.version>2023.06.5-SNAPSHOT</mycore.version>
   </properties>
   <build>
     <plugins>
