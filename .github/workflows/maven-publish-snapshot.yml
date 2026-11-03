@@ -4,9 +4,11 @@
 name: Maven Snapshot deploy
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'main'
+      - '2023.06.x'
 
 jobs:
   build:
